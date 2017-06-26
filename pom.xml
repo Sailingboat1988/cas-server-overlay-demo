@@ -7,6 +7,7 @@
     <groupId>py</groupId>
     <artifactId>overlay-demo</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
 
     <properties>
         <cas.version>4.1.10</cas.version>
@@ -56,6 +57,12 @@
             <version>${cas.version}</version>
             <type>war</type>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jasig.cas</groupId>
+            <artifactId>cas-server-webapp-support</artifactId>
+            <version>${cas.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

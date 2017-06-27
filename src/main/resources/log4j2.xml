@@ -27,7 +27,7 @@
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d %p [%c] - &lt;%m&gt;%n"/>
         </Console>
-        <RollingFile name="file" fileName="cas.log" append="true"
+        <RollingFile name="file" fileName="D:\temp\cas\cas.log" append="true"
                      filePattern="cas-%d{yyyy-MM-dd-HH}-%i.log">
             <PatternLayout pattern="%d %p [%c] - %m%n"/>
             <Policies>
@@ -36,7 +36,7 @@
                 <TimeBasedTriggeringPolicy />
             </Policies>
         </RollingFile>
-        <RollingFile name="perfFileAppender" fileName="perfStats.log" append="true"
+        <RollingFile name="perfFileAppender" fileName="D:\temp\cas\perfStats.log" append="true"
                      filePattern="perfStats-%d{yyyy-MM-dd-HH}-%i.log">
             <PatternLayout pattern="%m%n"/>
             <Policies>
@@ -65,6 +65,9 @@
         </Logger>
         <Logger name="org.jasig.inspektr.audit.support.Slf4jLoggingAuditTrailManager" level="info">
             <AppenderRef ref="file"/>
+        </Logger>
+        <Logger name="com.unicom" level="debug" additivity="false">
+            <AppenderRef ref="console"/>
         </Logger>
         <Root level="error">
             <AppenderRef ref="console"/>

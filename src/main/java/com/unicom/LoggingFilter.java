@@ -149,7 +149,6 @@ public class LoggingFilter implements Filter {
 	}
 
 	protected String getResponseDescription(LoggingHttpServletResponseWrapper responseWrapper) {
-		System.out.println("aaaaaaaaaaaaaaaaaaaaaa");
 		LoggingResponse loggingResponse = new LoggingResponse();
 		loggingResponse.setStatus(responseWrapper.getStatus());
 		loggingResponse.setHeaders(responseWrapper.getHeaders());

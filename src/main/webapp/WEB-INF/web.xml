@@ -43,7 +43,11 @@
 
     <filter>
         <filter-name>LoggingFilter</filter-name>
-        <filter-class>py.web.LoggingFilter</filter-class>
+        <filter-class>loggingtool.LoggingFilter</filter-class>
+        <init-param>
+            <param-name>excludedPaths</param-name>
+            <param-value>/css, /images, /js, /themes</param-value>
+        </init-param>
     </filter>
     <filter-mapping>
         <filter-name>LoggingFilter</filter-name>

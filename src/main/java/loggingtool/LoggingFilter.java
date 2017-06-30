@@ -1,4 +1,4 @@
-package com.unicom;
+package loggingtool;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,16 +11,17 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import com.unicom.entity.LoggingRequest;
-import com.unicom.entity.LoggingResponse;
-import com.unicom.wrapper.LoggingHttpServletRequestWrapper;
-import com.unicom.wrapper.LoggingHttpServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import loggingtool.entity.LoggingRequest;
+import loggingtool.entity.LoggingResponse;
+import loggingtool.wrapper.LoggingHttpServletRequestWrapper;
+import loggingtool.wrapper.LoggingHttpServletResponseWrapper;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;

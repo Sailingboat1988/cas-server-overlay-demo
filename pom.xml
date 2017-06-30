@@ -16,7 +16,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <servlet.version>3.1.0</servlet.version>
-        <mysql.driver.version>6.0.6</mysql.driver.version>
+        <mysql.driver.version>5.1.41</mysql.driver.version>
         <c3p0.version>0.9.5.1</c3p0.version>
     </properties>
 
@@ -76,15 +76,15 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.jasig.cas</groupId>
-            <artifactId>cas-server-support-jdbc</artifactId>
-            <version>${cas.version}</version>
-        </dependency>
-        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>${servlet.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jasig.cas</groupId>
+            <artifactId>cas-server-support-jdbc</artifactId>
+            <version>${cas.version}</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>

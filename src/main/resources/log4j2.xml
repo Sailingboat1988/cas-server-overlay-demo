@@ -66,7 +66,7 @@
         <Logger name="org.jasig.inspektr.audit.support.Slf4jLoggingAuditTrailManager" level="info">
             <AppenderRef ref="file"/>
         </Logger>
-        <Logger name="com.unicom" level="debug" additivity="false">
+        <Logger name="loggingtool" level="debug" additivity="false">
             <AppenderRef ref="console"/>
         </Logger>
         <Root level="error">

@@ -5,16 +5,19 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class LoggingHttpServletResponseWrapper extends HttpServletResponseWrapper {
 
+	private final Charset UTF_8 = Charset.forName("UTF-8");
 	private final LoggingServletOutpuStream loggingServletOutpuStream = new LoggingServletOutpuStream();
 
 	private final HttpServletResponse delegate;
+
+	private int httpStatus = 200;
 
 	public LoggingHttpServletResponseWrapper(HttpServletResponse response) {
 		super(response);
@@ -34,7 +37,7 @@ public class LoggingHttpServletResponseWrapper extends HttpServletResponseWrappe
 	}
 
 	public Map<String, String> getHeaders() {
-		Map<String, String> headers = new HashMap<>(0);
+		Map<String, String> headers = new HashMap(0);
 		for (String headerName : getHeaderNames()) {
 			headers.put(headerName, getHeader(headerName));
 		}
@@ -52,6 +55,40 @@ public class LoggingHttpServletResponseWrapper extends HttpServletResponseWrappe
 
 	public byte[] getContentAsBytes() {
 		return loggingServletOutpuStream.baos.toByteArray();
+	}
+
+	@Override
+	public void reset() {
+		super.reset();
+		httpStatus = 200;
+	}
+
+	@Override
+	public void sendError(int sc) throws IOException {
+		httpStatus = sc;
+		super.sendError(sc);
+	}
+
+	@Override
+	public void sendError(int sc, String msg) throws IOException {
+		httpStatus = sc;
+		super.sendError(sc, msg);
+	}
+
+	@Override
+	public void sendRedirect(String location) throws IOException {
+		httpStatus = super.SC_FOUND;
+		super.sendRedirect(location);
+	}
+
+	@Override
+	public void setStatus(int sc) {
+		httpStatus = sc;
+		super.setStatus(sc);
+	}
+
+	public int getStatus() {
+		return httpStatus;
 	}
 
 	private class LoggingServletOutpuStream extends ServletOutputStream {
@@ -82,6 +119,7 @@ public class LoggingHttpServletResponseWrapper extends HttpServletResponseWrappe
 			baos.write(b, off, len);
 		}
 	}
+
 	private class ResponsePrintWriter extends PrintWriter {
 		private ResponsePrintWriter(OutputStream buf, String characterEncoding) throws UnsupportedEncodingException {
 			super(new OutputStreamWriter(buf, characterEncoding));

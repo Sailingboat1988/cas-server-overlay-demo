@@ -3,30 +3,23 @@ package loggingtool;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import loggingtool.entity.LoggingRequest;
+import loggingtool.entity.LoggingResponse;
+import loggingtool.wrapper.LoggingHttpServletRequestWrapper;
+import loggingtool.wrapper.LoggingHttpServletResponseWrapper;
 import org.slf4j.Logger;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Stream;
-
-import loggingtool.entity.LoggingRequest;
-import loggingtool.entity.LoggingResponse;
-import loggingtool.wrapper.LoggingHttpServletRequestWrapper;
-import loggingtool.wrapper.LoggingHttpServletResponseWrapper;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toSet;
+import static loggingtool.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -80,7 +73,7 @@ public class LoggingFilter implements Filter {
 		String excludedPaths = filterConfig.getInitParameter("excludedPaths");
 		if (isNotBlank(excludedPaths)) {
 			String[] paths = excludedPaths.split("\\s*,\\s*");
-			this.excludedPaths = new HashSet<>(asList(paths));
+			this.excludedPaths = new HashSet(asList(paths));
 		}
 
 		String requestPrefix = filterConfig.getInitParameter("requestPrefix");
@@ -106,40 +99,43 @@ public class LoggingFilter implements Filter {
 			filterChain.doFilter(httpRequest, httpResponse);
 			return;
 		}
-		for (String excludedPath : excludedPaths) {
+		if (excludedPaths != null && excludedPaths.size() > 0) {
+			for (String excludedPath : excludedPaths) {
 //			String requestURI = httpRequest.getRequestURI();
-			String servletPath = httpRequest.getServletPath();
-			if (servletPath.startsWith(excludedPath)) {
-				filterChain.doFilter(httpRequest, httpResponse);
-				return;
+				String servletPath = httpRequest.getServletPath();
+				if (servletPath.startsWith(excludedPath)) {
+					filterChain.doFilter(httpRequest, httpResponse);
+					return;
+				}
 			}
 		}
 
 		LoggingHttpServletRequestWrapper requestWrapper = new LoggingHttpServletRequestWrapper(httpRequest);
 		LoggingHttpServletResponseWrapper responseWrapper = new LoggingHttpServletResponseWrapper(httpResponse);
 
-		log.debug(requestPrefix + getRequestDescription(requestWrapper));
+		String uuid = UUID.randomUUID().toString().replace("-", "");
+		log.debug(requestPrefix + getRequestDescription(requestWrapper, uuid));
 		filterChain.doFilter(requestWrapper, responseWrapper);
-		log.debug(responsePrefix + getResponseDescription(responseWrapper));
+		log.debug(responsePrefix + getResponseDescription(responseWrapper, uuid));
 		httpResponse.getOutputStream().write(responseWrapper.getContentAsBytes());
+		System.out.println(httpResponse.getStatus());
 	}
 
 	@Override
 	public void destroy() {
 	}
 
-	protected String getRequestDescription(LoggingHttpServletRequestWrapper requestWrapper) {
+	protected String getRequestDescription(LoggingHttpServletRequestWrapper requestWrapper, String uuid) {
 		LoggingRequest loggingRequest = new LoggingRequest();
+		loggingRequest.setUuid(uuid);
 		loggingRequest.setSender(requestWrapper.getLocalAddr());
 		loggingRequest.setMethod(requestWrapper.getMethod());
 		loggingRequest.setPath(requestWrapper.getRequestURI());
-		loggingRequest.setParams(requestWrapper.isFormPost() ? null : requestWrapper.getParameters());
+		loggingRequest.setParams(requestWrapper.getParameters());
 		loggingRequest.setHeaders(requestWrapper.getHeaders());
-		String content = requestWrapper.getContent();
-		if (log.isTraceEnabled()) {
-			loggingRequest.setBody(content);
-		} else {
-			loggingRequest.setBody(content.substring(0, Math.min(content.length(), maxContentSize)));
+
+		if (loggingRequest.getParams() != null && loggingRequest.getParams().get("logPwd") != null) {
+			loggingRequest.getParams().remove("logPwd");
 		}
 
 		try {
@@ -150,8 +146,9 @@ public class LoggingFilter implements Filter {
 		}
 	}
 
-	protected String getResponseDescription(LoggingHttpServletResponseWrapper responseWrapper) {
+	protected String getResponseDescription(LoggingHttpServletResponseWrapper responseWrapper, String uuid) {
 		LoggingResponse loggingResponse = new LoggingResponse();
+		loggingResponse.setUuid(uuid);
 		loggingResponse.setStatus(responseWrapper.getStatus());
 		loggingResponse.setHeaders(responseWrapper.getHeaders());
 		String content = responseWrapper.getContent();
@@ -173,7 +170,7 @@ public class LoggingFilter implements Filter {
 
 		private String loggerName = LoggingFilter.class.getName();
 
-		private int maxContentSize = 1024;
+		private int maxContentSize = 10240;
 
 		private Set<String> excludedPaths = emptySet();
 
@@ -197,7 +194,11 @@ public class LoggingFilter implements Filter {
 
 		public Builder excludedPaths(String... excludedPaths) {
 			requireNonNull(excludedPaths, "excludedPaths must not be null");
-			this.excludedPaths = Stream.of(excludedPaths).collect(toSet());
+			if (excludedPaths != null && excludedPaths.length > 0) {
+				for (String path : excludedPaths) {
+					this.excludedPaths.add(path);
+				}
+			}
 			return this;
 		}
 
